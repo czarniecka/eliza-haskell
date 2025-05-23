@@ -6,6 +6,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Text.Regex.TDFA ((=~))
 import Data.Time (getZonedTime, formatTime, defaultTimeLocale)
+import System.Directory (createDirectoryIfMissing)
 
 
 import Rules
@@ -45,4 +46,8 @@ saveSession ud = do
             , "Problem: " ++ fromMaybe "unknown" (userProblem ud)
             , "Stressor: " ++ fromMaybe "unknown" (userStressor ud)
             , "\nWhole conversation:" ] ++ unlines (rawMessages ud)
+
+    createDirectoryIfMissing True folder
+
     writeFile fileName content
+    putStrLn $ "Conversation saved to: " ++ fileName
