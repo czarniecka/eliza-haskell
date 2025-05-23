@@ -5,6 +5,8 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Text.Regex.TDFA ((=~))
+import Data.Time (getZonedTime, formatTime, defaultTimeLocale)
+
 
 import Rules
 
@@ -32,10 +34,14 @@ loop userData = do
 
 saveSession :: UserData -> IO ()
 saveSession ud = do
-    let content = unlines
-            [ "Name: " ++ fromMaybe "unknown" (userName ud)
+    currentTime <- getZonedTime
+    let timestamp = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" currentTime
+        fileName = "session-" ++ formatTime defaultTimeLocale "%Y-%m-%d_%H-%M-%S" currentTime ++ ".txt"
+        content = unlines
+            [ "Conversation ended at: " ++ timestamp
+            , "Name: " ++ fromMaybe "unknown" (userName ud)
             , "Mood: " ++ fromMaybe "unknown" (userMood ud)
             , "Problem: " ++ fromMaybe "unknown" (userProblem ud)
             , "Stressor: " ++ fromMaybe "unknown" (userStressor ud)
             , "\nWhole conversation:" ] ++ unlines (rawMessages ud)
-    writeFile "session.txt" content
+    writeFile fileName content
