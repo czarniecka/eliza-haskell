@@ -36,7 +36,8 @@ saveSession :: UserData -> IO ()
 saveSession ud = do
     currentTime <- getZonedTime
     let timestamp = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" currentTime
-        fileName = "session-" ++ formatTime defaultTimeLocale "%Y-%m-%d_%H-%M-%S" currentTime ++ ".txt"
+        folder = "../data/"
+        fileName = folder ++ "session-" ++ formatTime defaultTimeLocale "%Y-%m-%d_%H-%M-%S" currentTime ++ ".txt"
         content = unlines
             [ "Conversation ended at: " ++ timestamp
             , "Name: " ++ fromMaybe "unknown" (userName ud)
