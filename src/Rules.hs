@@ -173,6 +173,14 @@ generateResponse input =
             "Have you tried talking to someone about it?"
         | Just _ <- matchRegex "i am stressed about (.+)" inputLower ->
             "That sounds tough. How are you coping with it?"
+        | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
+            "Hello! How can I assist you today?"
+        | matchesApprox ["how are you", "how's it going", "how are you doing"] inputLower ->
+            "I’m just a program, but I’m here to help you. How are you feeling?"
+        | matchesApprox ["what's your name", "who are you", "tell me about yourself"] inputLower ->
+            "I’m a virtual assistant here to listen and support you. What’s on your mind?"
+        | matchesApprox ["i'm feeling down", "i'm feeling sad", "i'm feeling bad"] inputLower ->
+            "I’m sorry to hear that. Do you want to talk about what’s making you feel this way?"
         | matchesApprox ["thank you"] inputLower ->
             "You’re welcome. I’m here for you."
         | matchesApprox ["i can't sleep"] inputLower ->
