@@ -291,7 +291,7 @@ generateResponse input =
         | matchesApprox ["i feel lost in lectures"] inputLower ->
             "It’s okay not to understand everything right away. Want to talk about which parts confuse you the most?"
         | matchesApprox ["i'm scared of speaking in class"] inputLower ->
-            "Public speaking can be really intimidating. Would practicing or preparing more help ease the anxiety?"
+            "Public speaking can be really intimidating. You can practice your speeches in front of a mirror."
         | matchesApprox ["i failed my exam"] inputLower ->
             "That’s really tough to deal with. Would you like to talk about what happened and what’s next?"
         | matchesApprox ["i feel unmotivated to study"] inputLower ->
@@ -414,6 +414,14 @@ generateResponse input =
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
         | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams", "exams"] inputLower ->
             "Exams can be really stressful. Have you tried any techniques to help manage your anxiety?"
+        | matchesApprox ["really stressed about exams", "so stressed about exams", "very stressed about exams"] inputLower ->
+            "Exam stress is common. Have you found any strategies that help you cope with it?"
+        | matchesApprox ["really overwhelmed with assignments", "so overwhelmed with assignments", "very overwhelmed with assignments"] inputLower ->
+            "Assignments can pile up quickly. Have you tried breaking them down into smaller tasks?"
+        | matchesApprox ["really frustrated with group work", "so frustrated with group work", "very frustrated with group work"] inputLower ->
+            "Group work can be really challenging. What’s been the hardest part for you?"
+        | matchesApprox ["really confused about my major", "so confused about my major", "very confused about my major"] inputLower ->
+            "It’s okay to feel uncertain about your major. Many students go through this. Want to talk about what’s making you question it?"
         | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
             "How can I assist you today?"
         | otherwise -> 
