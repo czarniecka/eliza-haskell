@@ -2,6 +2,7 @@ module Rules where
 
 import Text.Regex.TDFA ((=~))
 import Data.Char (toLower, toUpper)
+import Data.List (isInfixOf)
 
 -- User data
 
@@ -32,6 +33,22 @@ matchRegex regex input =
     in case matches of
          [x] -> Just x
          _   -> Nothing
+
+-- Levenshtein distance
+levenshtein :: String -> String -> Int
+levenshtein s t = last (foldl transform [0..length t] s)
+  where
+    transform xs@(x:xs') c = scanl compute (x + 1) (zip3 t xs xs')
+      where
+        compute z (c', x', y) = minimum [y + 1, z + 1, x' + fromEnum (c /= c')]
+
+-- Check if input is similar (at most 2 edits away)
+isSimilar :: String -> String -> Bool
+isSimilar s1 s2 = levenshtein s1 s2 <= 3
+
+-- Helper to check similarity with phrases
+matchesApprox :: [String] -> String -> Bool
+matchesApprox phrases input = any (`isInfixOf` input) phrases || any (`isSimilar` input) phrases
 
 -- Update user data based on input
 updateUserData :: String -> UserData -> UserData
@@ -74,43 +91,44 @@ generateResponse input =
           "Have you tried talking to someone about it?"
       | Just _ <- matchRegex "i am stressed about (.+)" inputLower ->
           "That sounds tough. How are you coping with it?"
-      | inputLower =~ "thank you" -> "You’re welcome. I’m here for you."
-      | inputLower =~ "i can't sleep" ->
+      | matchesApprox ["thank you"] inputLower ->
+          "You’re welcome. I’m here for you."
+      | matchesApprox ["i can't sleep"] inputLower ->
           "Lack of sleep can be really hard. Have you tried any techniques to relax before bed?"
-      | inputLower =~ "i feel lonely" ->
+      | matchesApprox ["i feel lonely"] inputLower ->
           "You’re not alone in feeling that way. Would you like to talk more about it?"
-      | inputLower =~ "i feel anxious" ->
+      | matchesApprox ["i feel anxious"] inputLower ->
           "Anxiety can be overwhelming. What do you think is triggering it?"
-      | inputLower =~ "i have no motivation" ->
+      | matchesApprox ["i have no motivation"] inputLower ->
           "It's okay to feel unmotivated sometimes. What would help you feel more energized?"
-      | inputLower =~ "can you help me" ->
+      | matchesApprox ["can you help me"] inputLower ->
           "I’ll do my best to support you. What’s on your mind?"
-      | inputLower =~ "i'm afraid of (.*)" ->
+      | matchesApprox ["i'm afraid of"] inputLower ->
           "That sounds scary. What makes you afraid of that?"
-      | inputLower =~ "i feel overwhelmed" ->
+      | matchesApprox ["i feel overwhelmed"] inputLower ->
           "That must be difficult. Have you tried breaking things down into smaller steps?"
-      | inputLower =~ "i need someone to talk to" ->
+      | matchesApprox ["i need someone to talk to"] inputLower ->
           "I'm here to listen. What would you like to share?"
-      | inputLower =~ "i feel depressed" ->
+      | matchesApprox ["i feel depressed"] inputLower ->
           "I'm really sorry you're feeling this way. You're not alone, and it's okay to talk about it."
-      | inputLower =~ "i hate myself" ->
+      | matchesApprox ["i hate myself"] inputLower ->
           "I'm really sorry you feel that way. You matter, and your feelings are important."
-      | inputLower =~ "no one understands me" ->
+      | matchesApprox ["no one understands me"] inputLower ->
           "That sounds very isolating. I’m here, and I want to understand."
-      | inputLower =~ "i can't focus" ->
+      | matchesApprox ["i can't focus"] inputLower ->
           "Concentration can be hard when your mind is busy. What's been on your mind lately?"
-      | inputLower =~ "i'm tired of everything" ->
+      | matchesApprox ["i'm tired of everything"] inputLower ->
           "It’s okay to feel exhausted. Would you like to talk about what’s been wearing you down?"
-      | inputLower =~ "i want to give up" ->
+      | matchesApprox ["i want to give up"] inputLower ->
           "That sounds really tough. What’s been making you feel this way?"
-      | inputLower =~ "i cried today" ->
+      | matchesApprox ["i cried today"] inputLower ->
           "Crying is a natural way to release emotions. What made you feel like that?"
-      | inputLower =~ "i'm lost" ->
+      | matchesApprox ["i'm lost"] inputLower ->
           "When you say you're lost, what do you mean? Do you want to talk about what’s confusing?"
-      | inputLower =~ "i don't see the point" ->
+      | matchesApprox ["i don't see the point"] inputLower ->
           "It’s okay to question things. Would you like to explore what’s been making you feel that way?"
-      | inputLower =~ "what should i do" ->
+      | matchesApprox ["what should i do"] inputLower ->
           "Let’s try to understand what you’re going through first. Can you tell me more?"
-      | inputLower =~ "i need advice" ->
+      | matchesApprox ["i need advice"] inputLower ->
           "I'm here to listen and help as much as I can. What’s going on?"
       | otherwise -> "I understand. Please tell me more."
