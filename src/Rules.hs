@@ -35,7 +35,15 @@ notNames =
 
 
 cleanMoodWords :: String -> String
-cleanMoodWords = unwords . filter (`notElem` ["a", "bit", "very", "just", "kind of", "recently", "really"]) . words
+cleanMoodWords = unwords . filter (`notElem`
+  [ "a", "bit", "very", "just", "kind", "of", "really", "always", "recently"
+  , "yesterday", "today", "tomorrow", "quite", "so", "much", "somewhat"
+  , "rather", "extremely", "pretty", "maybe", "perhaps", "often", "sometimes"
+  , "never", "ever", "still", "again", "then", "now", "even", "just"
+  , "like", "sort", "kinda", "sorta", "slightly", "barely", "totally"
+  , "completely", "absolutely", "probably", "definitely", "certainly"
+  , "hopefully", "luckily", "unfortunately"
+  ]) . words
 
 moodPhrases :: [String]
 moodPhrases =
