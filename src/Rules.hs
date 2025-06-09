@@ -191,8 +191,6 @@ generateResponse input =
             "Do you want to ask something else?"
         | inputLower == "yes" || inputLower == "yeah" || inputLower == "yep" ->
             "That's okay. I'm here for you."
-        | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
-            "How can I assist you today?"
         | matchesApprox ["how are you", "how's it going", "how are you doing"] inputLower ->
             "I’m just a program, but I’m here to help you. How are you feeling?"
         | matchesApprox ["what's your name", "who are you", "tell me about yourself"] inputLower ->
@@ -421,6 +419,8 @@ generateResponse input =
             "Boredom can be frustrating. What do you usually enjoy doing that you haven’t had time for?"
         | matchesApprox ["really unmotivated", "so unmotivated", "very unmotivated"] inputLower ->
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
+        | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
+            "How can I assist you today?"
         | otherwise -> 
         deterministicChoice
             [ "I understand. Please tell me more."
