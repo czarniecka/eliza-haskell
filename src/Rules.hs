@@ -2,6 +2,7 @@ module Rules where
 
 import Text.Regex.TDFA ((=~))
 import Data.Char (toLower, toUpper)
+import Data.List (words)
 
 -- User data
 
@@ -25,6 +26,14 @@ capitalize :: String -> String
 capitalize []     = []
 capitalize (x:xs) = toUpper x : xs
 
+-- Count tokens in a string
+countTokens :: String -> Int
+countTokens = length . words
+
+-- Check if token count is 2 or 3
+validNameTokenCount :: String -> Bool
+validNameTokenCount s = let c = countTokens s in c == 1
+
 -- Helper: extract single group from regex match
 matchRegex :: String -> String -> Maybe String
 matchRegex regex input =
@@ -39,13 +48,16 @@ updateUserData input ud =
   let inputLower = toLowerString input
       raw = rawMessages ud ++ [input]
   in case () of
-    _ | Just name <- matchRegex "my name is ([a-z]+)" inputLower ->
+    _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
           ud { userName = Just (capitalize name), rawMessages = raw }
-      | Just name <- matchRegex "i am ([a-z]+)" inputLower ->
+      | Just name <- matchRegex "i am ([a-z ]+)" inputLower
+            , validNameTokenCount name ->
           ud { userName = Just (capitalize name), rawMessages = raw }
-      | Just name <- matchRegex "i['’`]?m ([a-z]+)" inputLower ->
+      | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower
+            , validNameTokenCount name ->
           ud { userName = Just (capitalize name), rawMessages = raw }
-      | Just name <- matchRegex "iam ([a-z]+)" inputLower -> 
+      | Just name <- matchRegex "iam ([a-z ]+)" inputLower
+            , validNameTokenCount name -> 
           ud { userName = Just (capitalize name), rawMessages = raw }
       | Just mood <- matchRegex "i feel ([a-z]+)" inputLower ->
           ud { userMood = Just mood, rawMessages = raw }
@@ -60,13 +72,16 @@ generateResponse :: String -> String
 generateResponse input =
   let inputLower = toLowerString input
   in case () of
-    _ | Just name <- matchRegex "my name is ([a-z]+)" inputLower ->
+    _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
           "Nice to meet you, " ++ capitalize name ++ "."
-      | Just name <- matchRegex "i am ([a-z]+)" inputLower ->
+      | Just name <- matchRegex "i am ([a-z ]+)" inputLower
+            , validNameTokenCount name ->
           "Nice to meet you, " ++ capitalize name ++ "."
-      | Just name <- matchRegex "i['’`]?m ([a-z]+)" inputLower ->
+      | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower
+            , validNameTokenCount name ->
           "Nice to meet you, " ++ capitalize name ++ "."
-      | Just name <- matchRegex "iam ([a-z]+)" inputLower ->
+      | Just name <- matchRegex "iam ([a-z ]+)" inputLower
+            , validNameTokenCount name ->
           "Nice to meet you, " ++ capitalize name ++ "."
       | Just _ <- matchRegex "i feel ([a-z]+)" inputLower ->
           "What makes you feel that way?"
