@@ -7,7 +7,6 @@ import Data.List (words)
 import Data.Char (ord, isAlpha)
 
 -- User data
-
 data UserData = UserData
   { userName    :: Maybe String
   , userMood    :: [String]
@@ -16,6 +15,7 @@ data UserData = UserData
   , rawMessages :: [String]
   }
 
+-- Initial (empty) user data.
 emptyUserData :: UserData
 emptyUserData = UserData
   { userName = Nothing
@@ -25,6 +25,7 @@ emptyUserData = UserData
   , rawMessages = []
   }
 
+-- List of words that are not considered valid names.
 notNames :: [String]
 notNames =
   [ "tired", "sad", "happy", "depressed", "angry", "lost"
@@ -39,7 +40,7 @@ notNames =
   , "bored", "unmotivated", "rejected", "insecure", "overhelmed"
   ]
 
-
+-- Removes common filler words and modifiers from a mood description.
 cleanMoodWords :: String -> String
 cleanMoodWords = unwords . filter (`notElem`
   [ "a", "bit", "very", "just", "kind", "of", "really", "always", "recently"
@@ -51,6 +52,7 @@ cleanMoodWords = unwords . filter (`notElem`
   , "hopefully", "luckily", "unfortunately", "am", "an", "i", "I", "and"
   ]) . words
 
+-- A list of common negative mood expressions or self-perceptions
 moodPhrases :: [String]
 moodPhrases =
   [ "not smart enough", "not good enough", "not worthy", "not okay"
@@ -87,7 +89,12 @@ matchRegex regex input =
         [x] -> Just x
         _   -> Nothing
 
--- Levenshtein distance
+-- Computes the Levenshtein distance between two strings.
+-- The Levenshtein distance is the minimum number of single-character
+-- edits (insertions, deletions, or substitutions) required
+-- to change one string into the other.
+-- This implementation uses a dynamic programming approach with
+-- a fold and scanl to efficiently calculate the distance.
 levenshtein :: String -> String -> Int
 levenshtein s t = last (foldl transform [0..length t] s)
     where
@@ -119,10 +126,18 @@ updateUserData input ud =
     let inputLower = toLowerString input
         raw = rawMessages ud ++ [input]
 
+        -- Determines whether the input string should be treated as a mood description or a user name.
+        -- It cleans the input by removing filler words and then checks:
+        --   - If the cleaned input matches known mood-related words or phrases,
+        --     or if it contains multiple words (indicating a mood phrase),
+        --     then the input is added to the user's mood list.
+        --   - Otherwise, if the input looks like a valid name (single word),
+        --     it is capitalized and stored as the user's name.
+        --   - If neither condition is met, only the raw message list is updated.
         handleNameOrMood name =
             let cleaned = cleanMoodWords name
                 tokenCount = length (words name)
-                cleanedCount = length (words cleaned)  -- liczymy słowa, nie znaki
+                cleanedCount = length (words cleaned)  -- counting words, not characters
             in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
                   then ud { userMood = userMood ud ++ [cleaned], rawMessages = raw }
                   else if validNameTokenCount name
@@ -153,17 +168,28 @@ updateUserData input ud =
 generateResponse :: String -> String
 generateResponse input =
     let inputLower = toLowerString input
+
+        -- Helper function that attempts to generate a friendly greeting response if the input
+        --   is likely a user name rather than a mood or phrase.
+        -- It works as follows:
+        --   - Splits the input string into words and counts them.
+        --   - Cleans the input by removing filler words.
+        --   - If the input is short enough (3 or fewer words) and not recognized as a mood phrase
+        --     or similar (checked against known mood lists), then it assumes the input is a name.
+        --   - Returns a greeting message "Nice to meet you, [Name]."
+        --   - If the input is too long or matches mood-related phrases, it returns Nothing
+        --     indicating it is not a name to greet.
         respondNameOrMood :: String -> Maybe String
         respondNameOrMood word =
           let tokens = words word
               tokenCount = length tokens
               cleaned = cleanMoodWords word
-              cleanedCount = length (words cleaned)  -- liczba słów po oczyszczeniu
+              cleanedCount = length (words cleaned)  
           in if tokenCount <= 3
                then if (cleaned `elem` notNames) || (word `elem` moodPhrases) || (cleaned `elem` moodPhrases) || (cleanedCount > 1)
-                      then Nothing  -- to nastrój lub coś innego, nie imię
-                      else Just ("Nice to meet you, " ++ capitalize word ++ ".")  -- prawdopodobne imię
-               else Nothing
+                      then Nothing  -- likely mood or phrase, not a name
+                      else Just ("Nice to meet you, " ++ capitalize word ++ ".")  -- probable user name
+               else Nothing  -- too long to be a name
 
     in case () of
       _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
@@ -414,14 +440,6 @@ generateResponse input =
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
         | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams", "exams"] inputLower ->
             "Exams can be really stressful. Have you tried any techniques to help manage your anxiety?"
-        | matchesApprox ["really stressed about exams", "so stressed about exams", "very stressed about exams"] inputLower ->
-            "Exam stress is common. Have you found any strategies that help you cope with it?"
-        | matchesApprox ["really overwhelmed with assignments", "so overwhelmed with assignments", "very overwhelmed with assignments"] inputLower ->
-            "Assignments can pile up quickly. Have you tried breaking them down into smaller tasks?"
-        | matchesApprox ["really frustrated with group work", "so frustrated with group work", "very frustrated with group work"] inputLower ->
-            "Group work can be really challenging. What’s been the hardest part for you?"
-        | matchesApprox ["really confused about my major", "so confused about my major", "very confused about my major"] inputLower ->
-            "It’s okay to feel uncertain about your major. Many students go through this. Want to talk about what’s making you question it?"
         | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
             "How can I assist you today?"
         | otherwise -> 
