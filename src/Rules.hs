@@ -35,7 +35,7 @@ notNames =
 
 
 cleanMoodWords :: String -> String
-cleanMoodWords = unwords . filter (`notElem` ["a", "bit", "very", "just", "kind of"]) . words
+cleanMoodWords = unwords . filter (`notElem` ["a", "bit", "very", "just", "kind of", "recently", "really"]) . words
 
 moodPhrases :: [String]
 moodPhrases =
@@ -151,7 +151,7 @@ generateResponse input =
               tokenCount = length tokens
               cleaned = cleanMoodWords word
           in if tokenCount <= 3
-               then if cleaned `elem` notNames || word `elem` moodPhrases
+               then if cleaned `elem` notNames || word `elem` moodPhrases || cleaned `elem` moodPhrases
                       then Nothing
                       else Just ("Nice to meet you, " ++ capitalize word ++ ".")
                else Nothing
