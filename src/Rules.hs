@@ -285,4 +285,24 @@ generateResponse input =
           "That sounds exhausting. What would you do if you had a free day just for yourself?"
       | matchesApprox ["i'm scared of the future"] inputLower ->
           "The future can feel really uncertain. Want to talk about what worries you the most?"
+      | matchesApprox ["really sad", "so sad", "very sad"] inputLower ->
+          "I’m sorry you’re feeling that way. Do you want to talk more about it?"
+      | matchesApprox ["really tired", "so tired", "very tired"] inputLower ->
+          "That sounds exhausting. Want to talk about what’s been draining your energy?"
+      | matchesApprox ["really angry", "so angry", "very angry"] inputLower ->
+          "Anger can be powerful. What’s been making you feel this way?"
+      | matchesApprox ["really anxious", "so anxious", "very anxious"] inputLower ->
+          "Anxiety can feel overwhelming. Do you want to share what’s causing it?"
+      | matchesApprox ["really lonely", "so lonely", "very lonely"] inputLower ->
+          "That must feel very isolating. I’m here to listen if you want to talk."
+      | matchesApprox ["really depressed", "so depressed", "very depressed"] inputLower ->
+          "Depression is really hard. You’re not alone. Would talking help a bit?"
+      | matchesApprox ["really empty", "so empty", "very empty"] inputLower ->
+          "Feeling empty can be difficult. What do you think might be behind that feeling?"
+      | matchesApprox ["really lost", "so lost", "very lost"] inputLower ->
+          "When everything feels unclear, it helps to talk. What’s making you feel lost?"
+      | matchesApprox ["really stressed", "so stressed", "very stressed"] inputLower ->
+          "Stress can pile up fast. Want to tell me more about what’s going on?"
+      | matchesApprox ["really overwhelmed", "so overwhelmed", "very overwhelmed"] inputLower ->
+          "It’s okay to feel overwhelmed. Maybe sharing what’s on your plate could help."
       | otherwise -> "I understand. Please tell me more."
