@@ -19,7 +19,33 @@ emptyUserData :: UserData
 emptyUserData = UserData Nothing Nothing Nothing Nothing []
 
 notNames :: [String]
-notNames = ["tired", "sad", "happy", "depressed", "angry", "lonely", "anxious", "ok", "fine", "good", "bad", "great", "stressed", "dupa"]
+notNames =
+  [ "tired", "sad", "happy", "depressed", "angry", "lost"
+  , "lonely", "anxious", "ok", "fine", "good", "bad", "great"
+  , "stressed", "smart", "hopeless", "useless", "worthless"
+  , "scared", "afraid", "frustrated", "numb", "empty"
+  , "overwhelmed", "worried", "broken", "down", "low"
+  , "ashamed", "confused", "nervous", "ignored", "unseen"
+  , "helpless", "invisible", "sad", "guilty", "exhausted"
+  , "angsty", "moody", "weak", "defeated", "hurt"
+  , "shy", "quiet", "isolated", "misunderstood", "apathetic"
+  , "bored", "unmotivated", "rejected", "insecure"
+  ]
+
+
+cleanMoodWords :: String -> String
+cleanMoodWords = unwords . filter (`notElem` ["a", "bit", "very", "just", "kind of"]) . words
+
+moodPhrases :: [String]
+moodPhrases =
+  [ "not smart enough", "not good enough", "not worthy", "not okay"
+  , "not fine", "not happy", "not capable", "not loved", "not understood", "not confident"
+  , "not motivated", "not important", "not enough", "not strong enough"
+  , "not successful", "not interesting", "not needed", "not safe"
+  , "not stable", "not useful", "not appreciated", "not wanted"
+  , "not heard", "not respected", "not brave", "not whole"
+  , "not calm", "not relaxed", "not in control", "not good with people"
+  ]
 
 -- Convert input to lowercase
 toLowerString :: String -> String
@@ -71,26 +97,29 @@ updateUserData input ud =
       _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
             ud { userName = Just (capitalize name), rawMessages = raw }
         | Just name <- matchRegex "i am ([a-z ]+)" inputLower ->
-            let tokens = words name
-            in if length tokens == 1 && name `elem` notNames
-                then ud { userMood = Just name, rawMessages = raw }
-                else if validNameTokenCount name
-                  then ud { userName = Just (capitalize name), rawMessages = raw }
-                  else ud { rawMessages = raw }
+            let cleaned = cleanMoodWords name
+                tokenCount = length (words name)
+            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases
+                  then ud { userMood = Just cleaned, rawMessages = raw }
+                  else if validNameTokenCount name
+                       then ud { userName = Just (capitalize name), rawMessages = raw }
+                       else ud { rawMessages = raw }
         | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower ->
-            let tokens = words name
-            in if length tokens == 1 && name `elem` notNames
-                then ud { userMood = Just name, rawMessages = raw }
-                else if validNameTokenCount name
-                  then ud { userName = Just (capitalize name), rawMessages = raw }
-                  else ud { rawMessages = raw }
+            let cleaned = cleanMoodWords name
+                tokenCount = length (words name)
+            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases
+                  then ud { userMood = Just cleaned, rawMessages = raw }
+                  else if validNameTokenCount name
+                       then ud { userName = Just (capitalize name), rawMessages = raw }
+                       else ud { rawMessages = raw }
         | Just name <- matchRegex "iam ([a-z ]+)" inputLower ->
-            let tokens = words name
-            in if length tokens == 1 && name `elem` notNames
-                then ud { userMood = Just name, rawMessages = raw }
-                else if validNameTokenCount name
-                  then ud { userName = Just (capitalize name), rawMessages = raw }
-                  else ud { rawMessages = raw }
+            let cleaned = cleanMoodWords name
+                tokenCount = length (words name)
+            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases
+                  then ud { userMood = Just cleaned, rawMessages = raw }
+                  else if validNameTokenCount name
+                       then ud { userName = Just (capitalize name), rawMessages = raw }
+                       else ud { rawMessages = raw }
         | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
             let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
                 mood = unwords wordsFiltered
@@ -107,9 +136,15 @@ generateResponse input =
     let inputLower = toLowerString input
         respondNameOrMood :: String -> String
         respondNameOrMood word =
-          if word `elem` notNames
-            then "What makes you feel " ++ word ++ "?"
-            else "Nice to meet you, " ++ capitalize word ++ "."
+          let tokens = words word
+              tokenCount = length tokens
+              cleaned = cleanMoodWords word
+          in if tokenCount <= 3
+               then if cleaned `elem` notNames || word `elem` moodPhrases
+                      then "What makes you feel " ++ word ++ "?"
+                      else "Nice to meet you, " ++ capitalize word ++ "."
+               else "I understand. Please tell me more."
+
     in case () of
       _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
             "Nice to meet you, " ++ capitalize name ++ "."
