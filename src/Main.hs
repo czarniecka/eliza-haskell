@@ -2,6 +2,7 @@ module Main where
 
 import System.IO
 import Data.Maybe (fromMaybe)
+import Data.List (intercalate)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Text.Regex.TDFA ((=~))
@@ -43,12 +44,12 @@ saveSession ud = do
         content = unlines
             [ "Conversation ended at: " ++ timestamp
             , "Name: " ++ fromMaybe "unknown" (userName ud)
-            , "Mood: " ++ fromMaybe "unknown" (userMood ud)
-            , "Problem: " ++ fromMaybe "unknown" (userProblem ud)
-            , "Stressor: " ++ fromMaybe "unknown" (userStressor ud)
-            , "\nWhole conversation:" ] ++ unlines (rawMessages ud)
+            , "Mood: " ++ if null (userMood ud) then "unknown" else intercalate ", " (userMood ud)
+            , "Problem: " ++ if null (userProblem ud) then "unknown" else intercalate ", " (userProblem ud)
+            , "Stressor: " ++ if null (userStressor ud) then "unknown" else intercalate ", " (userStressor ud)
+            , "\nWhole conversation:"
+            ] ++ unlines (rawMessages ud)
 
     createDirectoryIfMissing True folder
-
     writeFile fileName content
     putStrLn $ "Conversation saved to: " ++ fileName

@@ -9,15 +9,21 @@ import Data.Char (ord, isAlpha)
 -- User data
 
 data UserData = UserData
-    { userName     :: Maybe String
-    , userMood     :: Maybe String
-    , userProblem  :: Maybe String
-    , userStressor :: Maybe String 
-    , rawMessages  :: [String]
-    } deriving Show
+  { userName    :: Maybe String
+  , userMood    :: [String]
+  , userProblem :: [String]
+  , userStressor :: [String]
+  , rawMessages :: [String]
+  }
 
 emptyUserData :: UserData
-emptyUserData = UserData Nothing Nothing Nothing Nothing []
+emptyUserData = UserData
+  { userName = Nothing
+  , userMood = []
+  , userProblem = []
+  , userStressor = []
+  , rawMessages = []
+  }
 
 notNames :: [String]
 notNames =
@@ -116,27 +122,31 @@ updateUserData input ud =
         handleNameOrMood name =
             let cleaned = cleanMoodWords name
                 tokenCount = length (words name)
-                cleanedCount = length (words cleaned)  -- tutaj liczymy słowa, nie znaki
+                cleanedCount = length (words cleaned)  -- liczymy słowa, nie znaki
             in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
-                  then ud { userMood = Just cleaned, rawMessages = raw }
+                  then ud { userMood = userMood ud ++ [cleaned], rawMessages = raw }
                   else if validNameTokenCount name
                        then ud { userName = Just (capitalize name), rawMessages = raw }
                        else ud { rawMessages = raw }
 
     in case () of
-      _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
+      _ | Just problem <- matchRegex "i have a problem with (.+)" inputLower ->
+            ud { userProblem = userProblem ud ++ [problem], rawMessages = raw }
+        | Just stressor <- matchRegex "i am stressed about (.+)" inputLower ->
+            ud { userStressor = userStressor ud ++ [stressor], rawMessages = raw }
+        | Just stressor <- matchRegex "i['’`]?m stressed about (.+)" inputLower ->
+            ud { userStressor = userStressor ud ++ [stressor], rawMessages = raw }
+        | Just stressor <- matchRegex "iam stressed about (.+)" inputLower ->
+            ud { userStressor = userStressor ud ++ [stressor], rawMessages = raw }
+        | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
             ud { userName = Just (capitalize name), rawMessages = raw }
-        | Just name <- matchRegex "i am ([a-z ]+)" inputLower -> handleNameOrMood name
-        | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower -> handleNameOrMood name
-        | Just name <- matchRegex "iam ([a-z ]+)" inputLower -> handleNameOrMood name
         | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
             let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
                 mood = unwords wordsFiltered
-            in ud { userMood = Just mood, rawMessages = raw }
-        | Just problem <- matchRegex "i have a problem with (.+)" inputLower ->
-            ud { userProblem = Just problem, rawMessages = raw }
-        | Just stressor <- matchRegex "i am stressed about (.+)" inputLower ->
-            ud { userStressor = Just stressor, rawMessages = raw }
+            in ud { userMood = userMood ud ++ [mood], rawMessages = raw }
+        | Just name <- matchRegex "i am ([a-z ]+)" inputLower -> handleNameOrMood name
+        | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower -> handleNameOrMood name
+        | Just name <- matchRegex "iam ([a-z ]+)" inputLower -> handleNameOrMood name
         | otherwise -> ud { rawMessages = raw }
 
 -- Generate response based on input
@@ -404,12 +414,6 @@ generateResponse input =
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
         | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams", "exams"] inputLower ->
             "Exams can be really stressful. Have you tried any techniques to help manage your anxiety?"
-        | matchesApprox ["really stressed about exams", "so stressed about exams", "very stressed about exams"] inputLower ->
-            "Exam stress is common. Have you found any strategies that help you cope with it?"
-        | matchesApprox ["really overwhelmed with assignments", "so overwhelmed with assignments", "very overwhelmed with assignments"] inputLower ->
-            "Assignments can pile up quickly. Have you tried breaking them down into smaller tasks?"
-        | matchesApprox ["really frustrated with group work", "so frustrated with group work", "very frustrated with group work"] inputLower ->
-            "Group work can be really challenging. What’s been the hardest part for you?"
         | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
             "How can I assist you today?"
         | otherwise -> 
