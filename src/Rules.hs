@@ -407,6 +407,10 @@ generateResponse input =
             "It's alright to say no. I respect that."
         | matchesApprox ["ok", "okay"] inputLower ->
             "Do you want to ask something else?."
+        | matchesApprox ["no", "nope", "nah"] inputLower ->
+            "It's alright to say no. I respect that."
+        | matchesApprox ["ok", "okay"] inputLower ->
+            "Do you want to ask something else?."
         | otherwise -> 
         deterministicChoice
             [ "I understand. Please tell me more."
