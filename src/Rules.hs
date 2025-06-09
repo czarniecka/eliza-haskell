@@ -410,6 +410,8 @@ generateResponse input =
             "Assignments can pile up quickly. Have you tried breaking them down into smaller tasks?"
         | matchesApprox ["really frustrated with group work", "so frustrated with group work", "very frustrated with group work"] inputLower ->
             "Group work can be really challenging. What’s been the hardest part for you?"
+        | matchesApprox ["really confused about my major", "so confused about my major", "very confused about my major"] inputLower ->
+            "It’s okay to feel uncertain about your major. Many students go through this. Want to talk about what’s making you question it?"
         | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
             "How can I assist you today?"
         | otherwise -> 
