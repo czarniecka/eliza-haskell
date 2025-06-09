@@ -168,14 +168,12 @@ generateResponse input =
             "Have you tried talking to someone about it?"
         | Just _ <- matchRegex "i am stressed about (.+)" inputLower ->
             "That sounds tough. How are you coping with it?"
-        | matchesApprox ["no", "nope", "nah"] inputLower ->
+        | inputLower == "no" || inputLower == "nope" || inputLower == "nah" ->
             "It's alright to say no. I respect that."
-        | matchesApprox ["ok", "okay"] inputLower ->
+        | inputLower == "ok" || inputLower == "okay" ->
             "Do you want to ask something else?"
-        | matchesApprox ["yes", "yeah", "yep"] inputLower ->
+        | inputLower == "yes" || inputLower == "yeah" || inputLower == "yep" ->
             "That's okay. I'm here for you."
-        | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
-            "Hello! How can I assist you today?"
         | matchesApprox ["how are you", "how's it going", "how are you doing"] inputLower ->
             "I’m just a program, but I’m here to help you. How are you feeling?"
         | matchesApprox ["what's your name", "who are you", "tell me about yourself"] inputLower ->
@@ -420,6 +418,8 @@ generateResponse input =
             "It’s okay to have trouble with speaking. You can practice your speeches in front of a mirror."
         | matchesApprox ["problem with talking", "i do not like talking", "i don't like talking", "I don't want to talk", "I do not want to talk", "I won't talk", "I will not talk"] inputLower ->
             "That's okay. I'm here whenever you're ready to share."  
+        | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
+            "How can I assist you today?"
         | otherwise -> 
         deterministicChoice
             [ "I understand. Please tell me more."
