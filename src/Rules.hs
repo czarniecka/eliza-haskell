@@ -29,7 +29,7 @@ notNames =
   , "helpless", "invisible", "sad", "guilty", "exhausted"
   , "angsty", "moody", "weak", "defeated", "hurt"
   , "shy", "quiet", "isolated", "misunderstood", "apathetic"
-  , "bored", "unmotivated", "rejected", "insecure"
+  , "bored", "unmotivated", "rejected", "insecure", "overhelmed"
   ]
 
 
@@ -134,26 +134,26 @@ updateUserData input ud =
 generateResponse :: String -> String
 generateResponse input =
     let inputLower = toLowerString input
-        respondNameOrMood :: String -> String
+        respondNameOrMood :: String -> Maybe String
         respondNameOrMood word =
           let tokens = words word
               tokenCount = length tokens
               cleaned = cleanMoodWords word
           in if tokenCount <= 3
                then if cleaned `elem` notNames || word `elem` moodPhrases
-                      then "What makes you feel " ++ word ++ "?"
-                      else "Nice to meet you, " ++ capitalize word ++ "."
-               else "I understand. Please tell me more."
+                      then Nothing
+                      else Just ("Nice to meet you, " ++ capitalize word ++ ".")
+               else Nothing
 
     in case () of
       _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
             "Nice to meet you, " ++ capitalize name ++ "."
-        | Just name <- matchRegex "i am ([a-z ]+)" inputLower ->
-            respondNameOrMood name
-        | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower ->
-            respondNameOrMood name
-        | Just name <- matchRegex "iam ([a-z ]+)" inputLower ->
-            respondNameOrMood name
+        | Just name <- matchRegex "i am ([a-z ]+)" inputLower
+        , Just resp <- respondNameOrMood name -> resp
+        | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower
+        , Just resp <- respondNameOrMood name -> resp
+        | Just name <- matchRegex "iam ([a-z ]+)" inputLower
+        , Just resp <- respondNameOrMood name -> resp
         | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
             let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
                 mood = unwords wordsFiltered
