@@ -165,10 +165,6 @@ generateResponse input =
         , Just resp <- respondNameOrMood name -> resp
         | Just name <- matchRegex "iam ([a-z ]+)" inputLower
         , Just resp <- respondNameOrMood name -> resp
-        | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
-            let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
-                mood = unwords wordsFiltered
-            in "What makes you feel " ++ mood ++ "?"
         | Just _ <- matchRegex "i have a problem with (.+)" inputLower ->
             "Have you tried talking to someone about it?"
         | Just _ <- matchRegex "i am stressed about (.+)" inputLower ->
@@ -379,7 +375,7 @@ generateResponse input =
             "Boredom can be frustrating. What do you usually enjoy doing that you haven’t had time for?"
         | matchesApprox ["really unmotivated", "so unmotivated", "very unmotivated"] inputLower ->
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
-        | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams"] inputLower ->
+        | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams", "exams"] inputLower ->
             "Exams can be really stressful. Have you tried any techniques to help manage your anxiety?"
         | matchesApprox ["really stressed about exams", "so stressed about exams", "very stressed about exams"] inputLower ->
             "Exam stress is common. Have you found any strategies that help you cope with it?"
