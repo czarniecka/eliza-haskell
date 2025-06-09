@@ -305,4 +305,6 @@ generateResponse input =
           "Stress can pile up fast. Want to tell me more about what’s going on?"
       | matchesApprox ["really overwhelmed", "so overwhelmed", "very overwhelmed"] inputLower ->
           "It’s okay to feel overwhelmed. Maybe sharing what’s on your plate could help."
+      | matchesApprox ["I don't want to talk", "I do not want to talk", "I won't talk", "I will not talk"] inputLower ->
+          "That's okay. I'm here whenever you're ready to share."
       | otherwise -> "I understand. Please tell me more."
