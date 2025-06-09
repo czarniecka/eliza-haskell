@@ -18,6 +18,9 @@ data UserData = UserData
 emptyUserData :: UserData
 emptyUserData = UserData Nothing Nothing Nothing Nothing []
 
+notNames :: [String]
+notNames = ["tired", "sad", "happy", "depressed", "angry", "lonely", "anxious", "ok", "fine", "good", "bad", "great", "stressed", "dupa"]
+
 -- Convert input to lowercase
 toLowerString :: String -> String
 toLowerString = map toLower
@@ -68,14 +71,17 @@ updateUserData input ud =
     _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
           ud { userName = Just (capitalize name), rawMessages = raw }
       | Just name <- matchRegex "i am ([a-z ]+)" inputLower
-            , validNameTokenCount name ->
-          ud { userName = Just (capitalize name), rawMessages = raw }
+            , validNameTokenCount name
+            , name `notElem` notNames ->
+            ud { userName = Just (capitalize name), rawMessages = raw }
       | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower
-            , validNameTokenCount name ->
-          ud { userName = Just (capitalize name), rawMessages = raw }
+            , validNameTokenCount name
+            , name `notElem` notNames ->
+            ud { userName = Just (capitalize name), rawMessages = raw }
       | Just name <- matchRegex "iam ([a-z ]+)" inputLower
-            , validNameTokenCount name -> 
-          ud { userName = Just (capitalize name), rawMessages = raw }
+            , validNameTokenCount name 
+            , name `notElem` notNames ->
+            ud { userName = Just (capitalize name), rawMessages = raw }
       | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
         let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
             mood = unwords wordsFiltered
@@ -94,13 +100,16 @@ generateResponse input =
     _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
           "Nice to meet you, " ++ capitalize name ++ "."
       | Just name <- matchRegex "i am ([a-z ]+)" inputLower
-            , validNameTokenCount name ->
+            , validNameTokenCount name
+            , name `notElem` notNames ->
           "Nice to meet you, " ++ capitalize name ++ "."
       | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower
-            , validNameTokenCount name ->
+            , validNameTokenCount name
+            , name `notElem` notNames ->
           "Nice to meet you, " ++ capitalize name ++ "."
       | Just name <- matchRegex "iam ([a-z ]+)" inputLower
-            , validNameTokenCount name ->
+            , validNameTokenCount name 
+            , name `notElem` notNames ->
           "Nice to meet you, " ++ capitalize name ++ "."
       | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
         let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
