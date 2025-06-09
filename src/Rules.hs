@@ -42,7 +42,7 @@ cleanMoodWords = unwords . filter (`notElem`
   , "never", "ever", "still", "again", "then", "now", "even", "just"
   , "like", "sort", "kinda", "sorta", "slightly", "barely", "totally"
   , "completely", "absolutely", "probably", "definitely", "certainly"
-  , "hopefully", "luckily", "unfortunately"
+  , "hopefully", "luckily", "unfortunately", "am", "an", "i", "I", "and"
   ]) . words
 
 moodPhrases :: [String]
@@ -112,36 +112,23 @@ updateUserData :: String -> UserData -> UserData
 updateUserData input ud =
     let inputLower = toLowerString input
         raw = rawMessages ud ++ [input]
+
+        handleNameOrMood name =
+            let cleaned = cleanMoodWords name
+                tokenCount = length (words name)
+                cleanedCount = length (words cleaned)  -- tutaj liczymy słowa, nie znaki
+            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
+                  then ud { userMood = Just cleaned, rawMessages = raw }
+                  else if validNameTokenCount name
+                       then ud { userName = Just (capitalize name), rawMessages = raw }
+                       else ud { rawMessages = raw }
+
     in case () of
       _ | Just name <- matchRegex "my name is ([a-z ]+)" inputLower ->
             ud { userName = Just (capitalize name), rawMessages = raw }
-        | Just name <- matchRegex "i am ([a-z ]+)" inputLower ->
-            let cleaned = cleanMoodWords name
-                tokenCount = length (words name)
-                cleanedCount = length cleaned
-            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
-                  then ud { userMood = Just cleaned, rawMessages = raw }
-                  else if validNameTokenCount name
-                       then ud { userName = Just (capitalize name), rawMessages = raw }
-                       else ud { rawMessages = raw }
-        | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower ->
-            let cleaned = cleanMoodWords name
-                tokenCount = length (words name)
-                cleanedCount = length cleaned
-            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
-                  then ud { userMood = Just cleaned, rawMessages = raw }
-                  else if validNameTokenCount name
-                       then ud { userName = Just (capitalize name), rawMessages = raw }
-                       else ud { rawMessages = raw }
-        | Just name <- matchRegex "iam ([a-z ]+)" inputLower ->
-            let cleaned = cleanMoodWords name
-                tokenCount = length (words name)
-                cleanedCount = length cleaned
-            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
-                  then ud { userMood = Just cleaned, rawMessages = raw }
-                  else if validNameTokenCount name
-                       then ud { userName = Just (capitalize name), rawMessages = raw }
-                       else ud { rawMessages = raw }
+        | Just name <- matchRegex "i am ([a-z ]+)" inputLower -> handleNameOrMood name
+        | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower -> handleNameOrMood name
+        | Just name <- matchRegex "iam ([a-z ]+)" inputLower -> handleNameOrMood name
         | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
             let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
                 mood = unwords wordsFiltered
@@ -161,11 +148,11 @@ generateResponse input =
           let tokens = words word
               tokenCount = length tokens
               cleaned = cleanMoodWords word
-              cleanedCount = length cleaned
+              cleanedCount = length (words cleaned)  -- liczba słów po oczyszczeniu
           in if tokenCount <= 3
-               then if cleaned `elem` notNames || word `elem` moodPhrases || cleaned `elem` moodPhrases || cleanedCount > 1
-                      then Nothing
-                      else Just ("Nice to meet you, " ++ capitalize word ++ ".")
+               then if (cleaned `elem` notNames) || (word `elem` moodPhrases) || (cleaned `elem` moodPhrases) || (cleanedCount > 1)
+                      then Nothing  -- to nastrój lub coś innego, nie imię
+                      else Just ("Nice to meet you, " ++ capitalize word ++ ".")  -- prawdopodobne imię
                else Nothing
 
     in case () of
@@ -177,10 +164,6 @@ generateResponse input =
         , Just resp <- respondNameOrMood name -> resp
         | Just name <- matchRegex "iam ([a-z ]+)" inputLower
         , Just resp <- respondNameOrMood name -> resp
-        | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
-            let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
-                mood = unwords wordsFiltered
-            in "What makes you feel " ++ mood ++ "?"
         | Just _ <- matchRegex "i have a problem with (.+)" inputLower ->
             "Have you tried talking to someone about it?"
         | Just _ <- matchRegex "i am stressed about (.+)" inputLower ->
@@ -419,6 +402,22 @@ generateResponse input =
             "Boredom can be frustrating. What do you usually enjoy doing that you haven’t had time for?"
         | matchesApprox ["really unmotivated", "so unmotivated", "very unmotivated"] inputLower ->
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
+        | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams", "exams"] inputLower ->
+            "Exams can be really stressful. Have you tried any techniques to help manage your anxiety?"
+        | matchesApprox ["really stressed about exams", "so stressed about exams", "very stressed about exams"] inputLower ->
+            "Exam stress is common. Have you found any strategies that help you cope with it?"
+        | matchesApprox ["really overwhelmed with assignments", "so overwhelmed with assignments", "very overwhelmed with assignments"] inputLower ->
+            "Assignments can pile up quickly. Have you tried breaking them down into smaller tasks?"
+        | matchesApprox ["really frustrated with group work", "so frustrated with group work", "very frustrated with group work"] inputLower ->
+            "Group work can be really challenging. What’s been the hardest part for you?"
+        | matchesApprox ["really confused about my major", "so confused about my major", "very confused about my major"] inputLower ->
+            "It’s okay to feel uncertain about your major. Many students go through this. Want to talk about what’s making you question it?"
+        | matchesApprox ["really scared about the future", "so scared about the future", "very scared about the future"] inputLower ->
+            "The future can feel really uncertain. It’s okay to be scared. Want to talk about what’s worrying you the most?"        
+        | matchesApprox ["problem with speaking"] inputLower ->
+            "It’s okay to have trouble with speaking. You can practice your speeches in front of a mirror."
+        | matchesApprox ["problem with talking", "i do not like talking", "i don't like talking", "I don't want to talk", "I do not want to talk", "I won't talk", "I will not talk"] inputLower ->
+            "That's okay. I'm here whenever you're ready to share."  
         | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
             "How can I assist you today?"
         | otherwise -> 
