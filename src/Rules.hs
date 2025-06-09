@@ -47,8 +47,10 @@ updateUserData input ud =
           ud { userName = Just (capitalize name), rawMessages = raw }
       | Just name <- matchRegex "iam ([a-z]+)" inputLower -> 
           ud { userName = Just (capitalize name), rawMessages = raw }
-      | Just mood <- matchRegex "i feel ([a-z]+)" inputLower ->
-          ud { userMood = Just mood, rawMessages = raw }
+      | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
+        let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
+            mood = unwords wordsFiltered
+        in ud { userMood = Just mood, rawMessages = raw }
       | Just problem <- matchRegex "i have a problem with (.+)" inputLower ->
           ud { userProblem = Just problem, rawMessages = raw }
       | Just stressor <- matchRegex "i am stressed about (.+)" inputLower ->
@@ -68,8 +70,10 @@ generateResponse input =
           "Nice to meet you, " ++ capitalize name ++ "."
       | Just name <- matchRegex "iam ([a-z]+)" inputLower ->
           "Nice to meet you, " ++ capitalize name ++ "."
-      | Just _ <- matchRegex "i feel ([a-z]+)" inputLower ->
-          "What makes you feel that way?"
+      | Just moodPhrase <- matchRegex "i feel (.+)" inputLower ->
+        let wordsFiltered = filter (`notElem` ["a", "an", "the", "bit", "very"]) (words moodPhrase)
+            mood = unwords wordsFiltered
+        in "What makes you feel " ++ mood ++ "?"
       | Just _ <- matchRegex "i have a problem with (.+)" inputLower ->
           "Have you tried talking to someone about it?"
       | Just _ <- matchRegex "i am stressed about (.+)" inputLower ->
