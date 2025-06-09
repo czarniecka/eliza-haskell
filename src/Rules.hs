@@ -403,6 +403,10 @@ generateResponse input =
             "It’s okay to have trouble with speaking. You can practice your speeches in front of a mirror."
         | matchesApprox ["problem with talking", "i do not like talking", "i don't like talking", "I don't want to talk", "I do not want to talk", "I won't talk", "I will not talk"] inputLower ->
             "That's okay. I'm here whenever you're ready to share."  
+        | matchesApprox ["no", "nope", "nah"] inputLower ->
+            "It's alright to say no. I respect that."
+        | matchesApprox ["ok", "okay"] inputLower ->
+            "Do you want to ask something else?."
         | otherwise -> 
         deterministicChoice
             [ "I understand. Please tell me more."
