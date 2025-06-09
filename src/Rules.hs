@@ -12,7 +12,7 @@ data UserData = UserData
     { userName     :: Maybe String
     , userMood     :: Maybe String
     , userProblem  :: Maybe String
-    , userStressor :: Maybe String
+    , userStressor :: Maybe String 
     , rawMessages  :: [String]
     } deriving Show
 
@@ -118,7 +118,8 @@ updateUserData input ud =
         | Just name <- matchRegex "i am ([a-z ]+)" inputLower ->
             let cleaned = cleanMoodWords name
                 tokenCount = length (words name)
-            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases
+                cleanedCount = length cleaned
+            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
                   then ud { userMood = Just cleaned, rawMessages = raw }
                   else if validNameTokenCount name
                        then ud { userName = Just (capitalize name), rawMessages = raw }
@@ -126,7 +127,8 @@ updateUserData input ud =
         | Just name <- matchRegex "i['’`]?m ([a-z ]+)" inputLower ->
             let cleaned = cleanMoodWords name
                 tokenCount = length (words name)
-            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases
+                cleanedCount = length cleaned
+            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
                   then ud { userMood = Just cleaned, rawMessages = raw }
                   else if validNameTokenCount name
                        then ud { userName = Just (capitalize name), rawMessages = raw }
@@ -134,7 +136,8 @@ updateUserData input ud =
         | Just name <- matchRegex "iam ([a-z ]+)" inputLower ->
             let cleaned = cleanMoodWords name
                 tokenCount = length (words name)
-            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases
+                cleanedCount = length cleaned
+            in if (cleaned `elem` notNames && tokenCount <= 3) || name `elem` moodPhrases || cleanedCount > 1
                   then ud { userMood = Just cleaned, rawMessages = raw }
                   else if validNameTokenCount name
                        then ud { userName = Just (capitalize name), rawMessages = raw }
@@ -158,8 +161,9 @@ generateResponse input =
           let tokens = words word
               tokenCount = length tokens
               cleaned = cleanMoodWords word
+              cleanedCount = length cleaned
           in if tokenCount <= 3
-               then if cleaned `elem` notNames || word `elem` moodPhrases || cleaned `elem` moodPhrases
+               then if cleaned `elem` notNames || word `elem` moodPhrases || cleaned `elem` moodPhrases || cleanedCount > 1
                       then Nothing
                       else Just ("Nice to meet you, " ++ capitalize word ++ ".")
                else Nothing
