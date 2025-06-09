@@ -7,6 +7,7 @@ import qualified Data.Text.IO as TIO
 import Text.Regex.TDFA ((=~))
 import Data.Time (getZonedTime, formatTime, defaultTimeLocale)
 import System.Directory (createDirectoryIfMissing)
+import Data.Char (toLower)
 
 
 import Rules
@@ -23,7 +24,7 @@ loop userData = do
     putStr "> "
     hFlush stdout
     input <- getLine
-    if input == "bye"
+    if map toLower input =~ ("\\b(bye|goodbye)\\b" :: String)
         then do
             saveSession userData
             putStrLn "Thanks for this conversation. I hope you will feel better. Bye!"
