@@ -181,6 +181,12 @@ generateResponse input =
             "Have you tried talking to someone about it?"
         | Just _ <- matchRegex "i am stressed about (.+)" inputLower ->
             "That sounds tough. How are you coping with it?"
+        | matchesApprox ["no", "nope", "nah"] inputLower ->
+            "It's alright to say no. I respect that."
+        | matchesApprox ["ok", "okay"] inputLower ->
+            "Do you want to ask something else?"
+        | matchesApprox ["yes", "yeah", "yep"] inputLower ->
+            "That's okay. I'm here for you."
         | matchesApprox ["hello", "hi", "hey", "greetings", "good morning"] inputLower ->
             "Hello! How can I assist you today?"
         | matchesApprox ["how are you", "how's it going", "how are you doing"] inputLower ->
@@ -411,10 +417,6 @@ generateResponse input =
             "Boredom can be frustrating. What do you usually enjoy doing that you haven’t had time for?"
         | matchesApprox ["really unmotivated", "so unmotivated", "very unmotivated"] inputLower ->
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
-        | matchesApprox ["no", "nope", "nah"] inputLower ->
-            "It's alright to say no. I respect that."
-        | matchesApprox ["ok", "okay"] inputLower ->
-            "Do you want to ask something else?."
         | otherwise -> 
         deterministicChoice
             [ "I understand. Please tell me more."
