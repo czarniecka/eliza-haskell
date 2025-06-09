@@ -281,7 +281,7 @@ generateResponse input =
         | matchesApprox ["i feel lost in lectures"] inputLower ->
             "It’s okay not to understand everything right away. Want to talk about which parts confuse you the most?"
         | matchesApprox ["i'm scared of speaking in class"] inputLower ->
-            "Public speaking can be really intimidating. Would practicing or preparing more help ease the anxiety?"
+            "Public speaking can be really intimidating. You can practice your speeches in front of a mirror."
         | matchesApprox ["i failed my exam"] inputLower ->
             "That’s really tough to deal with. Would you like to talk about what happened and what’s next?"
         | matchesApprox ["i feel unmotivated to study"] inputLower ->
