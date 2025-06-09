@@ -313,6 +313,22 @@ generateResponse input =
             "That uncertainty is tough. Many students feel that way — do you want to talk through your thoughts?"
         | matchesApprox ["my parents expect too much from me"] inputLower ->
             "That kind of pressure can feel really intense. Want to share more about their expectations?"
+                | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams"] inputLower ->
+            "Exams can be really stressful. Have you tried any techniques to help manage your anxiety?"
+        | matchesApprox ["really stressed about exams", "so stressed about exams", "very stressed about exams"] inputLower ->
+            "Exam stress is common. Have you found any strategies that help you cope with it?"
+        | matchesApprox ["really overwhelmed with assignments", "so overwhelmed with assignments", "very overwhelmed with assignments"] inputLower ->
+            "Assignments can pile up quickly. Have you tried breaking them down into smaller tasks?"
+        | matchesApprox ["really frustrated with group work", "so frustrated with group work", "very frustrated with group work"] inputLower ->
+            "Group work can be really challenging. What’s been the hardest part for you?"
+        | matchesApprox ["really confused about my major", "so confused about my major", "very confused about my major"] inputLower ->
+            "It’s okay to feel uncertain about your major. Many students go through this. Want to talk about what’s making you question it?"
+        | matchesApprox ["really scared about the future", "so scared about the future", "very scared about the future"] inputLower ->
+            "The future can feel really uncertain. It’s okay to be scared. Want to talk about what’s worrying you the most?"        
+        | matchesApprox ["problem with speaking"] inputLower ->
+            "It’s okay to have trouble with speaking. You can practice your speeches in front of a mirror."
+        | matchesApprox ["problem with talking", "i do not like talking", "i don't like talking", "I don't want to talk", "I do not want to talk", "I won't talk", "I will not talk"] inputLower ->
+            "That's okay. I'm here whenever you're ready to share." 
         | matchesApprox ["i'm falling apart during exam season"] inputLower ->
             "Exam season can be brutal. What’s been hardest for you lately?"
         | matchesApprox ["i have no time for myself"] inputLower ->
@@ -387,22 +403,6 @@ generateResponse input =
             "Boredom can be frustrating. What do you usually enjoy doing that you haven’t had time for?"
         | matchesApprox ["really unmotivated", "so unmotivated", "very unmotivated"] inputLower ->
             "It’s okay to feel unmotivated sometimes. What do you think would help you feel more energized?"
-        | matchesApprox ["really anxious about exams", "so anxious about exams", "very anxious about exams"] inputLower ->
-            "Exams can be really stressful. Have you tried any techniques to help manage your anxiety?"
-        | matchesApprox ["really stressed about exams", "so stressed about exams", "very stressed about exams"] inputLower ->
-            "Exam stress is common. Have you found any strategies that help you cope with it?"
-        | matchesApprox ["really overwhelmed with assignments", "so overwhelmed with assignments", "very overwhelmed with assignments"] inputLower ->
-            "Assignments can pile up quickly. Have you tried breaking them down into smaller tasks?"
-        | matchesApprox ["really frustrated with group work", "so frustrated with group work", "very frustrated with group work"] inputLower ->
-            "Group work can be really challenging. What’s been the hardest part for you?"
-        | matchesApprox ["really confused about my major", "so confused about my major", "very confused about my major"] inputLower ->
-            "It’s okay to feel uncertain about your major. Many students go through this. Want to talk about what’s making you question it?"
-        | matchesApprox ["really scared about the future", "so scared about the future", "very scared about the future"] inputLower ->
-            "The future can feel really uncertain. It’s okay to be scared. Want to talk about what’s worrying you the most?"        
-        | matchesApprox ["problem with speaking"] inputLower ->
-            "It’s okay to have trouble with speaking. You can practice your speeches in front of a mirror."
-        | matchesApprox ["problem with talking", "i do not like talking", "i don't like talking", "I don't want to talk", "I do not want to talk", "I won't talk", "I will not talk"] inputLower ->
-            "That's okay. I'm here whenever you're ready to share."  
         | matchesApprox ["no", "nope", "nah"] inputLower ->
             "It's alright to say no. I respect that."
         | matchesApprox ["ok", "okay"] inputLower ->
