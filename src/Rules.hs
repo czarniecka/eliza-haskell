@@ -4,6 +4,7 @@ import Text.Regex.TDFA ((=~))
 import Data.Char (toLower, toUpper)
 import Data.List (isInfixOf)
 import Data.List (words)
+import Data.Char (ord, isAlpha)
 
 -- User data
 
@@ -87,6 +88,16 @@ isSimilar s1 s2 = levenshtein s1 s2 <= 3
 -- Helper to check similarity with phrases
 matchesApprox :: [String] -> String -> Bool
 matchesApprox phrases input = any (`isInfixOf` input) phrases || any (`isSimilar` input) phrases
+
+-- Deterministic choice from a list based on input length
+deterministicChoice :: [String] -> String -> String
+deterministicChoice options input =
+  let asciiSum = sum (map ord input)
+      wordCount = length (words input)
+      alphaCount = length (filter isAlpha input)
+      mix = asciiSum + wordCount * 3 + alphaCount * 2
+      index = mix `mod` length options
+  in options !! index
 
 -- Update user data based on input
 updateUserData :: String -> UserData -> UserData
@@ -384,4 +395,24 @@ generateResponse input =
             "It’s okay to have trouble with speaking. You can practice your speeches in front of a mirror."
         | matchesApprox ["problem with talking", "i do not like talking", "i don't like talking", "I don't want to talk", "I do not want to talk", "I won't talk", "I will not talk"] inputLower ->
             "That's okay. I'm here whenever you're ready to share."  
-        | otherwise -> "I understand. Please tell me more."
+        | otherwise -> 
+        deterministicChoice
+            [ "I understand. Please tell me more."
+            , "I'm listening. Would you like to explain further?"
+            , "Go on, I'm here for you."
+            , "Feel free to share more if you'd like."
+            , "That’s okay. I’m here to listen."
+            , "I'm listening. Say whatever’s on your mind."
+            , "Take your time — I’m here when you’re ready."
+            , "I hear you. Would you like to continue?"
+            , "Thanks for sharing that. Do you want to go deeper?"
+            , "I appreciate you opening up. What else would you like to share?"
+            , "Whenever you're ready, I'm here to talk."
+            , "It's okay to feel that way. Want to tell me more?"
+            , "Let’s take it one step at a time. I’m listening."
+            , "This space is for you. Say as much or as little as you like."
+            , "I'm here to support you. Would talking more help?"
+            , "Whatever you're going through, I'm glad you shared that."
+            , "What you’re saying matters. Go on if you’d like."
+            , "I'm still with you. Keep going if you want to."
+          ] input
